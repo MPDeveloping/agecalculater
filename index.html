@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Age Calculator with Custom DOB Picker</title>
+<style>
+body {
+    margin: 0;
+    background: white; /* New dark blue background */
+    color: white;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main wrapper for center alignment */
+.main-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+/* Navigation Bar */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: hotpink;
+    padding: 10px 20px;
+}
+
+/* Left image */
+nav img {
+    height: 35px;
+    border-radius: 5px;
+}
+
+/* Right Home Button */
+nav a {
+    background: black;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* Footer */
+footer {
+    background: hotpink;
+    padding: 10px;
+    text-align: center; 
+    font-size: 14px;
+    color: white;
+    width: 100%;
+}
+
+/* Container */
+.container {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 10px;
+    width: 320px;
+    text-align: center;
+}
+
+/* DOB Picker */
+.dob-picker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+select {
+    padding: 6px;
+    font-size: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+.calendar-icon {
+    width: 26px;
+    height: 26px;
+    background: url('https://cdn-icons-png.flaticon.com/512/747/747310.png') no-repeat center;
+    background-size: contain;
+}
+
+/* Buttons */
+button {
+    background: #38bdf8;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+button:hover {
+    background: #2aa7db;
+}
+
+/* Loader Animation */
+#loader {
+    display: none;
+    margin-top: 20px;
+}
+.bars {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    height: 120px;
+    justify-content: center;
+}
+.bar {
+    width: 6px;
+    background: #38bdf8;
+    border-radius: 3px;
+    animation: pulse 1s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.1s);
+    transform-origin: center;
+}
+@keyframes pulse {
+    0%, 100% { height: 20px; }
+    50% { height: 100px; }
+}
+
+#result {
+    font-size: 16px;
+    margin-top: 15px;
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav>
+    <!-- Left Side Image -->
+    <img src="mpde.png" alt="Logo">
+
+    <!-- Right Side Home Button -->
+    <a href="#">Home</a>
+</nav>
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+    <!-- Form Container -->
+    <div class="container" id="formContainer">
+        <h2>Enter Your Date of Birth</h2>
+        <div class="dob-picker">
+            <select id="month"></select>
+            <select id="day"></select>
+            <select id="year"></select>
+            <div class="calendar-icon"></div>
+        </div>
+        <button onclick="startCalculation()">Calculate Age</button>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader">
+        <div class="bars">
+            <div class="bar" style="--i:1"></div>
+            <div class="bar" style="--i:2"></div>
+            <div class="bar" style="--i:3"></div>
+            <div class="bar" style="--i:4"></div>
+            <div class="bar" style="--i:5"></div>
+            <div class="bar" style="--i:6"></div>
+            <div class="bar" style="--i:7"></div>
+            <div class="bar" style="--i:8"></div>
+            <div class="bar" style="--i:9"></div>
+            <div class="bar" style="--i:10"></div>
+            <div class="bar" style="--i:11"></div>
+        </div>
+        <p style="text-align:center;">Calculating your age...</p>
+    </div>
+
+    <!-- Result -->
+    <div class="container" id="resultContainer" style="display:none;">
+        <h2>🎉 Your Age</h2>
+        <div id="result"></div>
+        <button onclick="goBack()" style="background:#f87171;">⬅ Back</button>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>© 2025 Age Calculator. All Rights Reserved.</footer>
+
+<script>
+// Populate month, day, year dropdowns
+const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+let monthSelect = document.getElementById("month");
+let daySelect = document.getElementById("day");
+let yearSelect = document.getElementById("year");
+
+// Months
+monthNames.forEach((m, i) => {
+    let opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = m;
+    monthSelect.appendChild(opt);
+});
+
+// Days
+for (let i = 1; i <= 31; i++) {
+    let opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = i;
+    daySelect.appendChild(opt);
+}
+
+// Years
+let currentYear = new Date().getFullYear();
+for (let y = currentYear; y >= 1900; y--) {
+    let opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    yearSelect.appendChild(opt);
+}
+
+// Start calculation
+function startCalculation() {
+    let m = monthSelect.value;
+    let d = daySelect.value;
+    let y = yearSelect.value;
+
+    if (m === "" || d === "" || y === "") {
+        alert("Please select a valid date!");
+        return;
+    }
+
+    let finalDOB = new Date(y, m, d);
+
+    // Hide form and show loader
+    document.getElementById("formContainer").style.display = "none";
+    document.getElementById("resultContainer").style.display = "none";
+    document.getElementById("loader").style.display = "block";
+
+    // Delay to simulate animation
+    setTimeout(function() {
+        let now = new Date();
+        let years = now.getFullYear() - finalDOB.getFullYear();
+        let months = now.getMonth() - finalDOB.getMonth();
+        let days = now.getDate() - finalDOB.getDate();
+        let hours = now.getHours() - finalDOB.getHours();
+
+        if (days < 0) {
+            months--;
+            let prevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+            days += prevMonth;
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+        if (hours < 0) {
+            days--;
+            hours += 24;
+        }
+
+        // Show result
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("resultContainer").style.display = "block";
+
+        document.getElementById("result").innerHTML =
+            `<strong>${years}</strong> Years, 
+             <strong>${months}</strong> Months, 
+             <strong>${days}</strong> Days, 
+             <strong>${hours}</strong> Hours`;
+    }, 3000);
+}
+
+// Back button
+function goBack() {
+    document.getElementById("resultContainer").style.display = "none";
+    document.getElementById("formContainer").style.display = "block";
+    document.getElementById("loader").style.display = "none";
+}
+</script>
+
+</body>
+</html>
