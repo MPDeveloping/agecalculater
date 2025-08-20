@@ -1,248 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Age Calculator with Custom DOB Picker</title>
-<style>
-body {
-    margin: 0;
-    background: white; /* New dark blue background */
-    color: white;
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Age Calculator - MSDeveloping</title>
+  <link rel="icon" type="image/png" href="ms.jpeg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      scroll-behavior: smooth;
+      margin: 0;
+      background: white;
+    }
 
-/* Main wrapper for center alignment */
-.main-wrapper {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-}
+    /* DOB Picker */
+    .dob-picker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    select {
+      padding: 6px;
+      font-size: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .calendar-icon {
+      width: 26px;
+      height: 26px;
+      background: url('https://cdn-icons-png.flaticon.com/512/747/747310.png') no-repeat center;
+      background-size: contain;
+    }
 
-/* Navigation Bar */
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: hotpink;
-    padding: 10px 20px;
-}
+    /* Loader Animation */
+    #loader {
+      display: none;
+      margin-top: 20px;
+    }
+    .bars {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      height: 120px;
+      justify-content: center;
+    }
+    .bar {
+      width: 6px;
+      background: #38bdf8;
+      border-radius: 3px;
+      animation: pulse 1s ease-in-out infinite;
+      animation-delay: calc(var(--i) * 0.1s);
+      transform-origin: center;
+    }
+    @keyframes pulse {
+      0%, 100% { height: 20px; }
+      50% { height: 100px; }
+    }
 
-/* Left image */
-nav img {
-    height: 35px;
-    border-radius: 5px;
-}
-
-/* Right Home Button */
-nav a {
-    background: black;
-    color: white;
-    padding: 6px 14px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 15px;
-}
-
-/* Footer */
-footer {
-    background: hotpink;
-    padding: 10px;
-    text-align: center; 
-    font-size: 14px;
-    color: white;
-    width: 100%;
-}
-
-/* Container */
-.container {
-    background: #1e293b;
-    padding: 20px;
-    border-radius: 10px;
-    width: 320px;
-    text-align: center;
-}
-
-/* DOB Picker */
-.dob-picker {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-}
-select {
-    padding: 6px;
-    font-size: 15px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-.calendar-icon {
-    width: 26px;
-    height: 26px;
-    background: url('https://cdn-icons-png.flaticon.com/512/747/747310.png') no-repeat center;
-    background-size: contain;
-}
-
-/* Buttons */
-button {
-    background: #38bdf8;
-    border: none;
-    padding: 10px;
-    width: 100%;
-    cursor: pointer;
-    color: white;
-    font-size: 16px;
-    border-radius: 5px;
-    margin-top: 15px;
-}
-button:hover {
-    background: #2aa7db;
-}
-
-/* Loader Animation */
-#loader {
-    display: none;
-    margin-top: 20px;
-}
-.bars {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    height: 120px;
-    justify-content: center;
-}
-.bar {
-    width: 6px;
-    background: #38bdf8;
-    border-radius: 3px;
-    animation: pulse 1s ease-in-out infinite;
-    animation-delay: calc(var(--i) * 0.1s);
-    transform-origin: center;
-}
-@keyframes pulse {
-    0%, 100% { height: 20px; }
-    50% { height: 100px; }
-}
-
-#result {
-    font-size: 16px;
-    margin-top: 15px;
-}
-</style>
+    /* Back to Top */
+    .footer-back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #f1c40f;
+      color: #2c3e50;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 1.5rem;
+      transition: all 0.3s;
+      opacity: 0;
+      visibility: hidden;
+    }
+    .footer-back-to-top.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .footer-back-to-top:hover {
+      background-color: #f39c12;
+      transform: translateY(-3px);
+    }
+  </style>
 </head>
-<body>
+<body class="bg-gray-50">
 
-<!-- Navigation Bar -->
-<nav>
-    <!-- Left Side Image -->
-    <img src="mpde.jpeg" alt="Logo">
-
-    <!-- Right Side Home Button -->
-    <a href="#">Home</a>
-</nav>
-
-<!-- Main Wrapper -->
-<div class="main-wrapper">
-    <!-- Form Container -->
-    <div class="container" id="formContainer">
-        <h2>Enter Your Date of Birth</h2>
-        <div class="dob-picker">
-            <select id="month"></select>
-            <select id="day"></select>
-            <select id="year"></select>
-            <div class="calendar-icon"></div>
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm fixed w-full z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <span class="text-xl font-bold text-indigo-600">MS<span class="text-gray-800">Developing.</span></span>
         </div>
-        <button onclick="startCalculation()">Calculate Age</button>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="#home" class="text-gray-700 hover:text-indigo-600">Home</a>
+        </div>
+        <div class="md:hidden flex items-center">
+          <button id="mobile-menu-button" class="text-green-600 text-2xl">
+            <i class="fab fa-whatsapp"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white shadow-md">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <a href="#home" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="pt-20"></div> <!-- Navbar ke niche gap -->
+
+  <!-- Age Calculator Section -->
+  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100" id="home">
+    <!-- Form Container -->
+    <div class="bg-white text-black p-6 rounded-xl w-80 text-center shadow" id="formContainer">
+      <h2 class="text-xl font-bold mb-4">Enter Your Date of Birth</h2>
+      <div class="dob-picker">
+        <select id="month"></select>
+        <select id="day"></select>
+        <select id="year"></select>
+        <div class="calendar-icon"></div>
+      </div>
+      <button onclick="startCalculation()" class="bg-sky-400 hover:bg-sky-500 mt-4 py-2 px-4 rounded w-full text-white">Calculate Age</button>
     </div>
 
     <!-- Loader -->
     <div id="loader">
-        <div class="bars">
-            <div class="bar" style="--i:1"></div>
-            <div class="bar" style="--i:2"></div>
-            <div class="bar" style="--i:3"></div>
-            <div class="bar" style="--i:4"></div>
-            <div class="bar" style="--i:5"></div>
-            <div class="bar" style="--i:6"></div>
-            <div class="bar" style="--i:7"></div>
-            <div class="bar" style="--i:8"></div>
-            <div class="bar" style="--i:9"></div>
-            <div class="bar" style="--i:10"></div>
-            <div class="bar" style="--i:11"></div>
-        </div>
-        <p style="text-align:center;">Calculating your age...</p>
+      <div class="bars">
+        <div class="bar" style="--i:1"></div>
+        <div class="bar" style="--i:2"></div>
+        <div class="bar" style="--i:3"></div>
+        <div class="bar" style="--i:4"></div>
+        <div class="bar" style="--i:5"></div>
+        <div class="bar" style="--i:6"></div>
+        <div class="bar" style="--i:7"></div>
+        <div class="bar" style="--i:8"></div>
+        <div class="bar" style="--i:9"></div>
+        <div class="bar" style="--i:10"></div>
+        <div class="bar" style="--i:11"></div>
+      </div>
+      <p class="text-center text-black">Calculating your age...</p>
     </div>
 
     <!-- Result -->
-    <div class="container" id="resultContainer" style="display:none;">
-        <h2>🎉 Your Age</h2>
-        <div id="result"></div>
-        <button onclick="goBack()" style="background:#f87171;">⬅ Back</button>
+    <div class="bg-white text-black p-6 rounded-xl w-80 text-center hidden shadow" id="resultContainer">
+      <h2 class="text-xl mb-4">🎉 Your Age</h2>
+      <div id="result" class="font-semibold"></div>
+      <button onclick="goBack()" class="bg-red-400 hover:bg-red-500 mt-4 py-2 px-4 rounded w-full text-white">⬅ Back</button>
     </div>
-</div>
+  </div>
 
-<!-- Footer -->
-<footer>© 2025 Age Calculator. All Rights Reserved.</footer>
+  <!-- Extended Footer -->
+  <footer>
+    <div class="footer-container max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 px-6 py-16 bg-gray-900 text-white">
+      <div>
+        <h3 class="text-yellow-400 text-lg mb-4 font-semibold">About Us</h3>
+        <img src="ms.jpg" alt="customer service" class="rounded-lg mb-4 shadow-lg">
+        <p class="text-gray-300">We are a dedicated team committed to delivering exceptional products and services to our customers worldwide. Founded in 2025, we've grown to become a leader in our industry.</p>
+        <div class="flex gap-4 mt-4">
+          <a href="https://www.instagram.com/mahipat_suthar_09?igsh=aGJjMW04cW10MDA4" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-gray-900"><i class="fab fa-instagram"></i></a>
+          <a href="https://wa.me/916356952788?text=Hello!%20I%20want%20more%20details" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-700 hover:bg-yellow-400 hover:text-gray-900"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
 
-<script>
-// Populate month, day, year dropdowns
-const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-let monthSelect = document.getElementById("month");
-let daySelect = document.getElementById("day");
-let yearSelect = document.getElementById("year");
+      <div>
+        <h3 class="text-yellow-400 text-lg mb-4 font-semibold">More Tools</h3>
+        <ul class="space-y-2">
+          <li><a href="#" class="text-gray-400 hover:text-yellow-400">Age Calculator</a></li>
+          <li><a href="#" class="text-gray-400 hover:text-yellow-400">QR Code Generator</a></li>
+          <li><a href="#" class="text-gray-400 hover:text-yellow-400">MB to KB Converter</a></li>
+          <li><a href="#" class="text-gray-400 hover:text-yellow-400">PNG to JPG Converter</a></li>
+          <li><a href="#" class="text-gray-400 hover:text-yellow-400">Password Generator</a></li>
+          <li><a href="#" class="text-gray-400 hover:text-yellow-400">YouTube Thumbnail Downloader</a></li>
+        </ul>
+      </div>
 
-// Months
-monthNames.forEach((m, i) => {
-    let opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = m;
-    monthSelect.appendChild(opt);
-});
+      <div>
+        <h3 class="text-yellow-400 text-lg mb-4 font-semibold">Contact Info</h3>
+        <p class="text-gray-300"><i class="fas fa-map-marker-alt"></i> Sanaviya, Gujarat, India 385565</p>
+        <p class="text-gray-300"><i class="fas fa-phone"></i> +91 6356952788</p>
+        <p class="text-gray-300"><i class="fas fa-envelope"></i> mpgajjar68@gmail.com</p>
+        <p class="text-gray-300"><i class="fas fa-clock"></i> Mon-Fri: 9AM - 6PM</p>
+      </div>
 
-// Days
-for (let i = 1; i <= 31; i++) {
-    let opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = i;
-    daySelect.appendChild(opt);
-}
+      <div>
+        <h3 class="text-yellow-400 text-lg mb-4 font-semibold">Newsletter</h3>
+        <form class="flex">
+          <input type="email" placeholder="Your email" class="p-2 rounded-l bg-white text-black w-2/3">
+          <button type="submit" class="bg-yellow-400 text-black px-4 rounded-r font-bold hover:bg-yellow-500">Subscribe</button>
+        </form>
+      </div>
+    </div>
 
-// Years
-let currentYear = new Date().getFullYear();
-for (let y = currentYear; y >= 1900; y--) {
-    let opt = document.createElement("option");
-    opt.value = y;
-    opt.textContent = y;
-    yearSelect.appendChild(opt);
-}
+    <div class="bg-gray-800 text-center py-4 text-gray-400 text-sm">
+      © Powered By <a href="https://mpdeveloping.github.io/mpwebsite/" class="text-yellow-400">MS Developing</a>
+    </div>
 
-// Start calculation
-function startCalculation() {
-    let m = monthSelect.value;
-    let d = daySelect.value;
-    let y = yearSelect.value;
+    <a href="#" id="backToTop" class="footer-back-to-top"><i class="fas fa-arrow-up"></i></a>
+  </footer>
 
-    if (m === "" || d === "" || y === "") {
-        alert("Please select a valid date!");
-        return;
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-button').addEventListener('click', function() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    // Back to top button
+    window.addEventListener('scroll', function() {
+      var backToTop = document.getElementById('backToTop');
+      if (window.pageYOffset > 300) {
+        backToTop.classList.add('active');
+      } else {
+        backToTop.classList.remove('active');
+      }
+    });
+
+    document.getElementById('backToTop').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Populate DOB dropdowns
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    let monthSelect = document.getElementById("month");
+    let daySelect = document.getElementById("day");
+    let yearSelect = document.getElementById("year");
+
+    monthNames.forEach((m, i) => {
+      let opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = m;
+      monthSelect.appendChild(opt);
+    });
+    for (let i = 1; i <= 31; i++) {
+      let opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = i;
+      daySelect.appendChild(opt);
+    }
+    let currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= 1900; y--) {
+      let opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
     }
 
-    let finalDOB = new Date(y, m, d);
+    // Calculate Age
+    function startCalculation() {
+      let m = monthSelect.value;
+      let d = daySelect.value;
+      let y = yearSelect.value;
 
-    // Hide form and show loader
-    document.getElementById("formContainer").style.display = "none";
-    document.getElementById("resultContainer").style.display = "none";
-    document.getElementById("loader").style.display = "block";
+      if (m === "" || d === "" || y === "") {
+        alert("Please select a valid date!");
+        return;
+      }
 
-    // Delay to simulate animation
-    setTimeout(function() {
+      let finalDOB = new Date(y, m, d);
+      document.getElementById("formContainer").style.display = "none";
+      document.getElementById("resultContainer").style.display = "none";
+      document.getElementById("loader").style.display = "block";
+
+      setTimeout(function() {
         let now = new Date();
         let years = now.getFullYear() - finalDOB.getFullYear();
         let months = now.getMonth() - finalDOB.getMonth();
@@ -250,39 +279,36 @@ function startCalculation() {
         let hours = now.getHours() - finalDOB.getHours();
 
         if (days < 0) {
-            months--;
-            let prevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-            days += prevMonth;
+          months--;
+          let prevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+          days += prevMonth;
         }
         if (months < 0) {
-            years--;
-            months += 12;
+          years--;
+          months += 12;
         }
         if (hours < 0) {
-            days--;
-            hours += 24;
+          days--;
+          hours += 24;
         }
 
-        // Show result
         document.getElementById("loader").style.display = "none";
         document.getElementById("resultContainer").style.display = "block";
 
         document.getElementById("result").innerHTML =
-            `<strong>${years}</strong> Years, 
-             <strong>${months}</strong> Months, 
-             <strong>${days}</strong> Days, 
-             <strong>${hours}</strong> Hours`;
-    }, 3000);
-}
+          `<strong>${years}</strong> Years, 
+           <strong>${months}</strong> Months, 
+           <strong>${days}</strong> Days, 
+           <strong>${hours}</strong> Hours`;
+      }, 3000);
+    }
 
-// Back button
-function goBack() {
-    document.getElementById("resultContainer").style.display = "none";
-    document.getElementById("formContainer").style.display = "block";
-    document.getElementById("loader").style.display = "none";
-}
-</script>
-
+    // Back button
+    function goBack() {
+      document.getElementById("resultContainer").style.display = "none";
+      document.getElementById("formContainer").style.display = "block";
+      document.getElementById("loader").style.display = "none";
+    }
+  </script>
 </body>
-
 </html>
